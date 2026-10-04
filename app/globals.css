@@ -731,3 +731,10 @@ button { cursor: pointer; }
   .install-pill { display: none; }
   .rail-install { margin-top: 8px; color: var(--marigold); }
 }
+
+/* On phones and tablets the header is tight (title centred), so the install button is a round icon the same size as the avatar. */
+@media (max-width: 1023.98px) {
+  .install-pill { width: 42px; height: 42px; padding: 0; justify-content: center; border-radius: 50%; }
+  .install-pill span { display: none; }
+  .head-actions { min-width: 0; }
+}
