@@ -1,9 +1,9 @@
-// Loads the shared class timetable plus one elective into a person's timetable, using the
-// same rules and database as the app (Turso, or local.db when the Turso variables are empty).
+// Saves a person's HSS elective, using the same rules and database as the app (Turso, or local.db
+// when the Turso variables are empty). Classes and rooms are read from lib/curriculum.js, not stored.
 //
 //   npm run seed -- you@gmail.com [sociology | language | demography]
 //
-// Use the Gmail address you sign in with. Safe to run twice: entries that already exist are skipped.
+// Use the Gmail address you sign in with. Safe to run twice.
 // Rooms, times and electives live in lib/curriculum.js.
 import { startTimetable } from '../lib/actions.js';
 import { ELECTIVES } from '../lib/curriculum.js';
@@ -17,7 +17,7 @@ if (!EMAIL.includes('@') || !ELECTIVES[ELECTIVE]) {
 }
 
 startTimetable(EMAIL, ELECTIVE)
-  .then(() => console.log(`Done. ${EMAIL} now has the shared timetable and ${ELECTIVES[ELECTIVE].name}.`))
+  .then(() => console.log(`Done. ${EMAIL} now has the elective ${ELECTIVES[ELECTIVE].name}.`))
   .catch((err) => {
     console.error(err.message);
     process.exit(1);

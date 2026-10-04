@@ -8,5 +8,5 @@ export const POST = async (req) => handle(async (email) => setAttendance(email, 
 export const DELETE = async (req) =>
   handle((email) => {
     const p = new URL(req.url).searchParams;
-    return clearAttendance(email, Number(p.get('class_id')), p.get('date'));
+    return clearAttendance(email, p.get('class_id'), p.get('date'));
   });

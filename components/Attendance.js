@@ -82,7 +82,7 @@ export default function Attendance({ classes, attendance, min, compact }) {
       ) : (
         <div className="att-overall empty-state">
           <strong>Nothing tracked yet</strong>
-          <p>Open the Day view and tap the tick or cross on a class to start.</p>
+          <p>Open the Day view on a class day and tap the tick or cross on the class. Attendance can only be marked on the day itself.</p>
         </div>
       )}
 

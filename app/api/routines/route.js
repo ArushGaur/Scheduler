@@ -8,8 +8,7 @@ export const POST = async (req) => handle(async (email) => addRoutine(email, awa
 export const PUT = async (req) =>
   handle(async (email) => {
     const body = await req.json();
-    return updateRoutine(email, Number(body.id), body);
+    return updateRoutine(email, String(body.id), body);
   });
 
-export const DELETE = async (req) =>
-  handle((email) => deleteRoutine(email, Number(new URL(req.url).searchParams.get('id'))));
+export const DELETE = async (req) => handle((email) => deleteRoutine(email, String(new URL(req.url).searchParams.get('id'))));

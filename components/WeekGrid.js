@@ -41,6 +41,7 @@ export default function WeekGrid({ classes, routines, weekStart, todayKey, marks
                       <span className="wi-time">{fmt(it.start_time)}</span>
                       <span className="wi-name">{isClass ? it.subject : it.title}</span>
                       {isClass && it.type && <span className="wi-type">{it.type}</span>}
+                      {isClass && it.room && <span className="wi-type wi-room">{it.room}</span>}
                       {status && <span className={`wi-dot ${status}`} title={status} />}
                     </button>
                   </li>

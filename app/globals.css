@@ -125,6 +125,10 @@ button { cursor: pointer; }
 .block:hover { filter: brightness(0.97); }
 
 .b-marks { display: flex; gap: 6px; flex-shrink: 0; }
+.b-status { flex-shrink: 0; align-self: center; font-size: 12px; font-weight: 650; padding: 4px 10px; border-radius: 999px; }
+.b-status.present { background: var(--pos-bg); color: var(--pos); }
+.b-status.absent { background: var(--neg-bg); color: var(--neg); }
+.block[data-narrow='true'] .b-status { display: none; }
 .block[data-narrow='true'] .b-marks { display: none; }
 .block[data-narrow='true'] { padding-right: 8px; }
 .mark {
@@ -715,4 +719,15 @@ button { cursor: pointer; }
 /* ---------- installed app: no browser chrome, so give the top a little more room ---------- */
 @media (display-mode: standalone) and (max-width: 1023.98px) {
   .head { box-shadow: 0 12px 26px -20px rgba(13, 22, 48, 0.45); }
+}
+
+/* ---------- install button (header on phones and tablets, sidebar on laptops) ---------- */
+.install-pill {
+  display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px; border: 0; border-radius: 999px;
+  background: var(--ink); color: #fff; font-size: 14px; font-weight: 650; flex-shrink: 0; box-shadow: var(--shadow-s);
+}
+.install-pill:active { transform: scale(0.96); }
+@media (min-width: 1024px) {
+  .install-pill { display: none; }
+  .rail-install { margin-top: 8px; color: var(--marigold); }
 }

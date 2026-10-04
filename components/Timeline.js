@@ -90,7 +90,7 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
           if (it.kind === 'class') {
             const c = colorFor(it.subject);
             const status = marks[`${it.id}|${dateStr}`];
-            const place = [it.code, it.room, it.teacher].filter(Boolean).join(', ');
+            const place = [it.code, it.teacher].filter(Boolean).join(', ');
             return (
               <div
                 key={`c${it.id}`}
@@ -111,9 +111,13 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
                   <span>
                     {it.type ? `${it.type}, ` : ''}
                     {fmtRange(it.start_time, it.end_time)}
+                    {it.room ? ` \u00b7 ${it.room}` : ''}
                   </span>
                   {place && <span className="b-place">{place}</span>}
                 </div>
+                {!canMark && status && (
+                  <span className={`b-status ${status}`}>{status === 'present' ? 'Present' : 'Absent'}</span>
+                )}
                 {canMark && (
                   <div className="b-marks">
                     <button

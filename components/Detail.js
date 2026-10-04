@@ -4,7 +4,7 @@ import { DAY_LONG, fmt, parseKey } from '@/lib/time';
 import { colorFor } from '@/lib/colors';
 import { IconCheck, IconX, IconPencil, IconTrash } from './Icons';
 
-export default function Detail({ item, dateStr, status, canMark, stat, onMark, onEdit, onDelete }) {
+export default function Detail({ item, dateStr, status, canMark, isPast, stat, onMark, onEdit, onDelete }) {
   const [confirm, setConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const isClass = item.kind === 'class';
@@ -27,14 +27,19 @@ export default function Detail({ item, dateStr, status, canMark, stat, onMark, o
             {item.end_time ? ` to ${fmt(item.end_time)}` : ''}
           </p>
           {isClass && (item.type || item.code) && <p>{[item.type, item.code].filter(Boolean).join(', ')}</p>}
-          {isClass && (item.room || item.teacher) && <p>{[item.room, item.teacher].filter(Boolean).join(', ')}</p>}
+          {isClass && <p>Room: {item.room || 'not assigned'}</p>}
+          {isClass && item.teacher && <p>Teacher: {item.teacher}</p>}
         </div>
       </div>
 
       {isClass && (
         <div className="detail-attendance">
           <p className="detail-label">
-            {canMark ? `Attendance for ${parseKey(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}` : 'Attendance opens on the day of the class'}
+            {canMark
+              ? `Attendance for today, ${parseKey(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}`
+              : isPast
+              ? `${parseKey(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}: ${status === 'present' ? 'Present' : status === 'absent' ? 'Absent' : 'Not marked'}`
+              : 'Attendance opens on the day of the class'}
           </p>
           {canMark && (
             <div className="mark-row">
@@ -53,8 +58,6 @@ export default function Detail({ item, dateStr, status, canMark, stat, onMark, o
           )}
         </div>
       )}
-
-      {isClass && <p className="detail-locked">Class timings are set by your department and cannot be edited.</p>}
 
       {!isClass && (
       <div className="form-actions split">

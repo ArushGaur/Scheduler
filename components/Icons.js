@@ -40,6 +40,7 @@ export const IconX = make(<path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />);
 export const IconLeft = make(<path d="M14.5 6l-6 6 6 6" />);
 export const IconRight = make(<path d="M9.5 6l6 6-6 6" />);
 export const IconTrash = make(<path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" />);
+export const IconInstall = make(<path d="M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14" />);
 export const IconPencil = make(<path d="M4 20h4L19.5 8.5a2.1 2.1 0 00-3-3L5 17z" />);
 
 export function Brand({ size = 40 }) {

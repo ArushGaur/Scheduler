@@ -12,9 +12,10 @@ import Detail from '@/components/Detail';
 import Account, { Avatar } from '@/components/Account';
 import ElectivePicker from '@/components/ElectivePicker';
 import Onboarding from '@/components/Onboarding';
+import useInstall from '@/components/useInstall';
 import { colorFor } from '@/lib/colors';
 import { ELECTIVES } from '@/lib/curriculum';
-import { Brand, IconChart, IconDay, IconLeft, IconPlus, IconRight, IconWeek } from '@/components/Icons';
+import { Brand, IconChart, IconDay, IconInstall, IconLeft, IconPlus, IconRight, IconWeek } from '@/components/Icons';
 
 // Most colleges require 75%. Change it here if yours is different.
 const MIN_ATTENDANCE = 75;
@@ -37,6 +38,7 @@ export default function TimetableApp({ user }) {
   const [now, setNow] = useState(null);
   const [sheet, setSheet] = useState(null);
   const [toast, setToast] = useState('');
+  const installer = useInstall();
 
   /* ----- clock ----- */
   useEffect(() => {
@@ -67,6 +69,8 @@ export default function TimetableApp({ user }) {
     return () => clearTimeout(id);
   }, [toast]);
 
+  const todayKey = now ? dateKey(now) : null;
+
   const marks = useMemo(() => {
     const m = {};
     data.attendance.forEach((a) => (m[`${a.class_id}|${a.date}`] = a.status));
@@ -75,6 +79,7 @@ export default function TimetableApp({ user }) {
 
   const mark = useCallback(
     async (classId, date, next) => {
+      if (date !== todayKey) return;
       const current = marks[`${classId}|${date}`];
       const clearing = current === next;
       setData((d) => ({
@@ -84,14 +89,14 @@ export default function TimetableApp({ user }) {
           : [...d.attendance.filter((a) => !(a.class_id === classId && a.date === date)), { class_id: classId, date, status: next }],
       }));
       try {
-        if (clearing) await api(`/api/attendance?class_id=${classId}&date=${date}`, 'DELETE');
+        if (clearing) await api(`/api/attendance?class_id=${encodeURIComponent(classId)}&date=${date}`, 'DELETE');
         else await api('/api/attendance', 'POST', { class_id: classId, date, status: next });
       } catch (err) {
         setToast(`Could not save attendance. ${err.message}`);
         load();
       }
     },
-    [marks, load]
+    [marks, load, todayKey]
   );
 
   async function save(payload, id) {
@@ -104,7 +109,7 @@ export default function TimetableApp({ user }) {
 
   async function remove(item) {
     try {
-      await api(`/api/routines?id=${item.id}`, 'DELETE');
+      await api(`/api/routines?id=${encodeURIComponent(item.id)}`, 'DELETE');
       await load();
       setSheet(null);
       setToast(`Deleted ${item.title}`);
@@ -125,12 +130,12 @@ export default function TimetableApp({ user }) {
   }
 
   /* ----- derived ----- */
-  const todayKey = now ? dateKey(now) : null;
   const nowMin = now ? now.getHours() * 60 + now.getMinutes() : 0;
   const selectedDate = selected ? parseKey(selected) : null;
   const dow = selectedDate?.getDay();
   const isToday = selected === todayKey;
-  const canMark = selected ? selected <= todayKey : false;
+  // Attendance can only be marked on the day itself. Earlier days are read only.
+  const canMark = selected ? selected === todayKey : false;
 
   const items = useMemo(() => {
     if (dow === undefined) return [];
@@ -206,6 +211,18 @@ export default function TimetableApp({ user }) {
   const openAdd = () => setSheet({ type: 'form', defaultDay: dow });
   const openItem = (item, date = selected) => setSheet({ type: 'detail', item, date });
   const openAccount = () => setSheet({ type: 'account' });
+  // Where the browser can show its own install dialog, install straight away. Otherwise open the steps.
+  const showInstall = installer.mode !== 'hidden' && installer.mode !== 'installed';
+  const onInstall = async () => {
+    if (installer.mode === 'prompt' && (await installer.install())) return;
+    openAccount();
+  };
+  const installBtn = showInstall ? (
+    <button className="install-pill" onClick={onInstall} aria-label="Install Timetable as an app">
+      <IconInstall size={18} />
+      <span>Install</span>
+    </button>
+  ) : null;
   const accountBtn = (
     <button className="avatar-btn" onClick={openAccount} aria-label={`Account, ${user.email}`}>
       <Avatar user={user} />
@@ -226,6 +243,12 @@ export default function TimetableApp({ user }) {
             </button>
           ))}
         </nav>
+        {showInstall && (
+          <button className="rail-btn rail-install" onClick={onInstall}>
+            <IconInstall />
+            <span>Install app</span>
+          </button>
+        )}
         <button className="rail-btn rail-account" onClick={openAccount} aria-label={`Account, ${user.email}`}>
           <Avatar user={user} />
           <span>Account</span>
@@ -246,7 +269,7 @@ export default function TimetableApp({ user }) {
                 </div>
               )}
               <div className="head-actions">
-                {accountBtn}
+                {installBtn}{accountBtn}
                 <button className="btn primary add-desktop" onClick={openAdd}>
                   <IconPlus size={18} /> Add
                 </button>
@@ -261,7 +284,7 @@ export default function TimetableApp({ user }) {
                 </div>
                 <h2>{focus.item.subject}</h2>
                 <p className="focus-meta">
-                  {[focus.item.type, fmtRange(focus.item.start_time, focus.item.end_time), focus.item.code || focus.item.room].filter(Boolean).join(', ')}
+                  {[focus.item.type, fmtRange(focus.item.start_time, focus.item.end_time), focus.item.room ? `Room ${focus.item.room}` : null].filter(Boolean).join(', ')}
                 </p>
                 {focus.kind === 'now' && (
                   <div className="focus-bar" role="progressbar" aria-valuenow={focus.pct} aria-valuemin={0} aria-valuemax={100}>
@@ -333,7 +356,7 @@ export default function TimetableApp({ user }) {
                 <button className="icon-btn boxed" onClick={() => shiftWeek(1)} aria-label="Next week"><IconRight size={20} /></button>
               </div>
               <div className="head-actions">
-                {accountBtn}
+                {installBtn}{accountBtn}
                 <button className="btn primary add-desktop" onClick={openAdd}><IconPlus size={18} /> Add</button>
               </div>
             </header>
@@ -356,7 +379,7 @@ export default function TimetableApp({ user }) {
                 <h1>Attendance</h1>
                 <p className="date">Minimum required is {MIN_ATTENDANCE}%</p>
               </div>
-              <div className="head-actions">{accountBtn}</div>
+              <div className="head-actions">{installBtn}{accountBtn}</div>
             </header>
             <Attendance classes={data.classes} attendance={data.attendance} min={MIN_ATTENDANCE} />
           </>
@@ -397,7 +420,8 @@ export default function TimetableApp({ user }) {
             item={sheet.item}
             dateStr={sheet.date}
             status={marks[`${sheet.item.id}|${sheet.date}`]}
-            canMark={sheet.date <= todayKey}
+            canMark={sheet.date === todayKey}
+            isPast={sheet.date < todayKey}
             stat={sheet.item.kind === 'class' ? stats.find((s) => s.name.toLowerCase() === sheet.item.subject.toLowerCase()) : null}
             onMark={(st) => mark(sheet.item.id, sheet.date, st)}
             onEdit={() => setSheet({ type: 'form', item: sheet.item, defaultDay: sheet.item.day_of_week })}
