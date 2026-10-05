@@ -119,7 +119,7 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
                   <span className={`b-status ${status}`}>{status === 'present' ? 'Present' : 'Absent'}</span>
                 )}
                 {canMark && (
-                  <div className="b-marks">
+                  <div className="b-marks" onClick={(e) => e.stopPropagation()}>
                     <button
                       className={`mark present ${status === 'present' ? 'on' : ''}`}
                       aria-label={`Mark ${it.subject} present`}

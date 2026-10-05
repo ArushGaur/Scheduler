@@ -36,7 +36,7 @@ export default function Detail({ item, dateStr, status, canMark, isPast, stat, o
         <div className="detail-attendance">
           <p className="detail-label">
             {canMark
-              ? `Attendance for today, ${parseKey(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}`
+              ? `Attendance for ${isPast ? '' : 'today, '}${parseKey(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}`
               : isPast
               ? `${parseKey(dateStr).toLocaleDateString(undefined, { day: 'numeric', month: 'long' })}: ${status === 'present' ? 'Present' : status === 'absent' ? 'Absent' : 'Not marked'}`
               : 'Attendance opens on the day of the class'}

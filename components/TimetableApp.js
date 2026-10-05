@@ -79,7 +79,7 @@ export default function TimetableApp({ user }) {
 
   const mark = useCallback(
     async (classId, date, next) => {
-      if (date !== todayKey) return;
+      if (!date || date > todayKey) return;
       const current = marks[`${classId}|${date}`];
       const clearing = current === next;
       setData((d) => ({
@@ -134,8 +134,8 @@ export default function TimetableApp({ user }) {
   const selectedDate = selected ? parseKey(selected) : null;
   const dow = selectedDate?.getDay();
   const isToday = selected === todayKey;
-  // Attendance can only be marked on the day itself. Earlier days are read only.
-  const canMark = selected ? selected === todayKey : false;
+  // Attendance can be marked for today and any earlier date, but never future dates.
+  const canMark = selected ? selected <= todayKey : false;
 
   const items = useMemo(() => {
     if (dow === undefined) return [];
@@ -420,7 +420,7 @@ export default function TimetableApp({ user }) {
             item={sheet.item}
             dateStr={sheet.date}
             status={marks[`${sheet.item.id}|${sheet.date}`]}
-            canMark={sheet.date === todayKey}
+            canMark={sheet.date <= todayKey}
             isPast={sheet.date < todayKey}
             stat={sheet.item.kind === 'class' ? stats.find((s) => s.name.toLowerCase() === sheet.item.subject.toLowerCase()) : null}
             onMark={(st) => mark(sheet.item.id, sheet.date, st)}
