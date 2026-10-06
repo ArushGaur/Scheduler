@@ -30,12 +30,13 @@ const NAV = [
 ];
 
 
-// Regular users see plain classes exactly as before: cancelled classes are simply not there,
-// and extra/changed classes look like any other class. Only the owner gets the tags and controls.
+// Regular users see the timetable exactly as before, plus an "Extra" tag on extra classes.
+// Cancelled classes are simply not there and changed classes show their new time.
+// Only the owner gets the Changed/Cancelled tags and the controls.
 function visibleOccurrences(isAdmin, date, dow, classes, extras, exceptions) {
   const list = occurrencesOn(date, dow, classes, extras, exceptions);
   if (isAdmin) return list;
-  return list.filter((i) => !i.cancelled).map(({ extra, changed, was, cancelled, ...plain }) => plain);
+  return list.filter((i) => !i.cancelled).map(({ changed, was, cancelled, ...plain }) => plain);
 }
 
 const spell = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`);
