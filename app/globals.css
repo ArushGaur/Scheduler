@@ -738,3 +738,40 @@ button { cursor: pointer; }
   .install-pill span { display: none; }
   .head-actions { min-width: 0; }
 }
+
+/* ---------- owner tools: extra / changed / cancelled classes ---------- */
+.b-tag { display: inline-block; margin-left: 8px; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 700; font-style: normal; letter-spacing: 0.02em; vertical-align: 1px; flex-shrink: 0; }
+.b-tag[data-kind='extra'] { background: var(--ink); color: #fff; }
+.b-tag[data-kind='changed'] { background: #fde7b0; color: #6b4a00; }
+.b-tag[data-kind='cancelled'] { background: var(--neg-bg); color: var(--neg); }
+.week-item .b-tag { margin-left: 0; }
+.block.class.cancelled, .week-item.cancelled { opacity: 0.62; }
+.block.class.cancelled .b-text strong, .week-item.cancelled .wi-name { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+.status-tag { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
+.status-tag[data-kind='extra'] { background: var(--ink); color: #fff; }
+.status-tag[data-kind='changed'] { background: #fde7b0; color: #6b4a00; }
+.status-tag[data-kind='cancelled'] { background: var(--neg-bg); color: var(--neg); }
+.detail-top .detail-was { font-size: 13px; }
+.admin-box { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line-soft); }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.admin-grid .btn { width: 100%; }
+.admin-undo { margin-top: 12px; }
+.form-note { font-size: 14px; color: var(--slate); background: var(--mist); padding: 10px 14px; border-radius: 12px; }
+.form-class { font-family: var(--display); font-size: 20px; font-weight: 650; }
+.type-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 7px; }
+.type-chips .chip { width: auto; padding: 0 16px; }
+.add-choice { display: grid; gap: 10px; }
+.add-opt { display: grid; gap: 3px; text-align: left; padding: 14px 16px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--paper); }
+.add-opt:hover { border-color: var(--ink); }
+.add-opt strong { font-weight: 650; }
+.add-opt span { font-size: 14px; color: var(--slate); }
+.manage { display: grid; gap: 22px; }
+.manage-add { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.manage section h3 { font-size: 13px; font-weight: 700; color: var(--slate); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+.manage ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.manage li { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 14px; background: var(--mist); }
+.manage li > div:first-child { display: grid; gap: 2px; min-width: 0; }
+.manage li strong { font-weight: 650; overflow-wrap: anywhere; }
+.manage li span { font-size: 13px; color: var(--slate); }
+.manage-btns { display: flex; gap: 2px; flex-shrink: 0; }
+.manage-btns .btn { height: 38px; padding: 0 12px; }

@@ -13,7 +13,7 @@ export function Avatar({ user, size = 36 }) {
   );
 }
 
-export default function Account({ user, elective, onChangeElective, onSignOut }) {
+export default function Account({ user, elective, isAdmin, onManage, onChangeElective, onSignOut }) {
   return (
     <div className="account">
       <div className="account-who">
@@ -30,6 +30,15 @@ export default function Account({ user, elective, onChangeElective, onSignOut })
         </div>
         <button className="btn secondary" onClick={onChangeElective}>{elective ? 'Change' : 'Choose'}</button>
       </div>
+      {isAdmin && (
+        <div className="account-elective">
+          <div>
+            <span className="account-label">Owner</span>
+            <strong>Schedule changes</strong>
+          </div>
+          <button className="btn secondary" onClick={onManage}>Manage</button>
+        </div>
+      )}
       <InstallApp />
       <p className="account-note">Your classes, routines and attendance are saved to your account, so you will see them on any device you sign in from.</p>
       <button className="btn secondary account-out" onClick={onSignOut}>

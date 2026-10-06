@@ -91,10 +91,12 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
             const c = colorFor(it.subject);
             const status = marks[`${it.id}|${dateStr}`];
             const place = [it.code, it.teacher].filter(Boolean).join(', ');
+            const tag = it.cancelled ? 'Cancelled' : it.extra ? 'Extra' : it.changed ? 'Changed' : null;
+            const tagKind = it.cancelled ? 'cancelled' : it.extra ? 'extra' : 'changed';
             return (
               <div
                 key={`c${it.id}`}
-                className={`block class ${status || ''}`}
+                className={`block class ${status || ''} ${it.cancelled ? 'cancelled' : ''}`}
                 data-short={short}
                 data-narrow={it.cols > 1}
                 data-live={isToday && it.s <= nowMin && nowMin < it.e}
@@ -107,7 +109,10 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
                 aria-label={`${it.subject}, ${fmt(it.start_time)} to ${fmt(it.end_time)}`}
               >
                 <div className="b-text">
-                  <strong>{it.subject}</strong>
+                  <strong>
+                    {it.subject}
+                    {tag && <em className="b-tag" data-kind={tagKind}>{tag}</em>}
+                  </strong>
                   <span>
                     {it.type ? `${it.type}, ` : ''}
                     {fmtRange(it.start_time, it.end_time)}
@@ -115,10 +120,10 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
                   </span>
                   {place && <span className="b-place">{place}</span>}
                 </div>
-                {!canMark && status && (
+                {!canMark && status && !it.cancelled && (
                   <span className={`b-status ${status}`}>{status === 'present' ? 'Present' : 'Absent'}</span>
                 )}
-                {canMark && (
+                {canMark && !it.cancelled && (
                   <div className="b-marks" onClick={(e) => e.stopPropagation()}>
                     <button
                       className={`mark present ${status === 'present' ? 'on' : ''}`}

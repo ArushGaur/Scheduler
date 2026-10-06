@@ -9,11 +9,14 @@ import Attendance, { computeStats } from '@/components/Attendance';
 import Sheet from '@/components/Sheet';
 import ItemForm from '@/components/ItemForm';
 import Detail from '@/components/Detail';
+import ClassForm from '@/components/ClassForm';
+import ManagePanel from '@/components/ManagePanel';
 import Account, { Avatar } from '@/components/Account';
 import ElectivePicker from '@/components/ElectivePicker';
 import Onboarding from '@/components/Onboarding';
 import useInstall from '@/components/useInstall';
 import { colorFor } from '@/lib/colors';
+import { occurrencesOn } from '@/lib/resolve';
 import { ELECTIVES } from '@/lib/curriculum';
 import { Brand, IconChart, IconDay, IconInstall, IconLeft, IconPlus, IconRight, IconWeek } from '@/components/Icons';
 
@@ -27,10 +30,18 @@ const NAV = [
 ];
 
 
+// Regular users see plain classes exactly as before: cancelled classes are simply not there,
+// and extra/changed classes look like any other class. Only the owner gets the tags and controls.
+function visibleOccurrences(isAdmin, date, dow, classes, extras, exceptions) {
+  const list = occurrencesOn(date, dow, classes, extras, exceptions);
+  if (isAdmin) return list;
+  return list.filter((i) => !i.cancelled).map(({ extra, changed, was, cancelled, ...plain }) => plain);
+}
+
 const spell = (m) => (m >= 60 ? `${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}` : `${m} min`);
 
 export default function TimetableApp({ user }) {
-  const [data, setData] = useState({ classes: [], routines: [], attendance: [], profile: null });
+  const [data, setData] = useState({ classes: [], extras: [], exceptions: [], routines: [], attendance: [], profile: null, isAdmin: false, admin: null });
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState('');
   const [view, setView] = useState('day');
@@ -70,6 +81,12 @@ export default function TimetableApp({ user }) {
   }, [toast]);
 
   const todayKey = now ? dateKey(now) : null;
+
+  // Weekly classes plus extra classes that have already happened, so extras count towards attendance.
+  const allClasses = useMemo(
+    () => [...data.classes, ...data.extras.filter((x) => todayKey && x.date <= todayKey)],
+    [data.classes, data.extras, todayKey]
+  );
 
   const marks = useMemo(() => {
     const m = {};
@@ -129,6 +146,41 @@ export default function TimetableApp({ user }) {
     setToast(`Elective set to ${ELECTIVES[key].name}`);
   }
 
+  /* ----- owner tools (changes everyone sees) ----- */
+  async function runAdmin(action, payload, message, keepSheet = false) {
+    await api('/api/admin/classes', 'POST', { action, ...payload });
+    await load();
+    if (!keepSheet) setSheet(null);
+    setToast(message);
+  }
+  const quickAdmin = async (...args) => {
+    try {
+      await runAdmin(...args);
+    } catch (err) {
+      setToast(err.message);
+    }
+  };
+
+  const classFormSave = (f) => {
+    const { mode, item, date } = sheet;
+    if (mode === 'extra-new') return runAdmin('addExtra', f, `Added extra class ${f.subject}`);
+    if (mode === 'extra') return runAdmin('updateExtra', { ...f, id: item.id }, `Saved ${f.subject}`, sheet.from === 'manage');
+    if (mode === 'weekly-new') return runAdmin('addClass', f, `Added ${f.subject}`);
+    if (mode === 'weekly-edit') return runAdmin('updateClass', { ...f, id: item.id }, `Updated ${item.subject} for every week`);
+    return runAdmin('changeOccurrence', { ...f, class_id: item.id, date }, `Changed ${item.subject} on this date`);
+  };
+
+  const onAdminAct = (act, item, date) => {
+    if (act === 'cancel') return quickAdmin('cancelOccurrence', { class_id: item.id, date }, `Cancelled ${item.subject} on this date`);
+    if (act === 'restore') return quickAdmin('restoreOccurrence', { class_id: item.id, date }, `${item.subject} restored`);
+    if (act === 'remove') return quickAdmin('removeClass', { id: item.id }, `Removed ${item.subject} from the timetable`);
+    if (act === 'deleteExtra') return quickAdmin('deleteExtra', { id: item.id }, `Deleted extra ${item.subject}`);
+    if (act === 'editExtra') return setSheet({ type: 'classForm', mode: 'extra', item });
+    if (act === 'editDate') return setSheet({ type: 'classForm', mode: 'occurrence', item, date });
+    // Edit every week: show the usual values, not this date's change.
+    if (act === 'editWeekly') return setSheet({ type: 'classForm', mode: 'weekly-edit', item: { ...item, ...(item.was || {}) } });
+  };
+
   /* ----- derived ----- */
   const nowMin = now ? now.getHours() * 60 + now.getMinutes() : 0;
   const selectedDate = selected ? parseKey(selected) : null;
@@ -141,22 +193,23 @@ export default function TimetableApp({ user }) {
     if (dow === undefined) return [];
     const withTimes = (i) => ({ ...i, s: toMin(i.start_time), e: i.end_time ? toMin(i.end_time) : toMin(i.start_time) + 30 });
     return [
-      ...data.classes.filter((c) => c.day_of_week === dow).map((c) => withTimes({ kind: 'class', ...c })),
+      ...visibleOccurrences(data.isAdmin, selected, dow, data.classes, data.extras, data.exceptions).map((c) => withTimes({ kind: 'class', ...c })),
       ...data.routines.filter((r) => r.day_of_week === dow).map((r) => withTimes({ kind: 'routine', ...r })),
     ].sort((a, b) => a.s - b.s);
-  }, [data, dow]);
+  }, [data, dow, selected]);
 
   const subline = useMemo(() => {
-    const cls = items.filter((i) => i.kind === 'class');
+    const cls = items.filter((i) => i.kind === 'class' && !i.cancelled);
+    const cancelled = items.filter((i) => i.cancelled).length;
     if (isToday) {
       const current = cls.find((i) => i.s <= nowMin && nowMin < i.e);
       const next = cls.find((i) => i.s > nowMin);
       if (current) return `${current.subject} is on until ${fmt(current.end_time)}`;
       if (next) return `Next class is ${next.subject} at ${fmt(next.start_time)}`;
-      return cls.length ? 'Classes are done for today' : 'No classes today';
+      return cls.length ? 'Classes are done for today' : cancelled ? 'Today’s classes are cancelled' : 'No classes today';
     }
-    const r = items.length - cls.length;
-    return `${cls.length} ${cls.length === 1 ? 'class' : 'classes'} and ${r} ${r === 1 ? 'routine' : 'routines'}`;
+    const r = items.filter((i) => i.kind === 'routine').length;
+    return `${cls.length} ${cls.length === 1 ? 'class' : 'classes'}${cancelled ? `, ${cancelled} cancelled` : ''} and ${r} ${r === 1 ? 'routine' : 'routines'}`;
   }, [items, isToday, nowMin]);
 
   const swipe = useRef({ x: 0, y: 0 });
@@ -166,10 +219,10 @@ export default function TimetableApp({ user }) {
     const dy = e.changedTouches[0].clientY - swipe.current.y;
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6 && selectedDate) setSelected(dateKey(addDays(selectedDate, dx < 0 ? 1 : -1)));
   };
-  const live = isToday && items.some((i) => i.kind === 'class' && i.s <= nowMin && nowMin < i.e);
+  const live = isToday && items.some((i) => i.kind === 'class' && !i.cancelled && i.s <= nowMin && nowMin < i.e);
   const focus = useMemo(() => {
     if (!isToday) return null;
-    const cls = items.filter((i) => i.kind === 'class');
+    const cls = items.filter((i) => i.kind === 'class' && !i.cancelled);
     const current = cls.find((i) => i.s <= nowMin && nowMin < i.e);
     if (current) return { kind: 'now', item: current, left: current.e - nowMin, pct: Math.round(((nowMin - current.s) / (current.e - current.s)) * 100) };
     const next = cls.find((i) => i.s > nowMin);
@@ -208,7 +261,7 @@ export default function TimetableApp({ user }) {
   const weekEnd = addDays(weekStart, 6);
   const rangeLabel = `${weekStart.getDate()} ${MONTHS[weekStart.getMonth()].slice(0, 3)} to ${weekEnd.getDate()} ${MONTHS[weekEnd.getMonth()].slice(0, 3)}`;
   const shiftWeek = (n) => setSelected(dateKey(addDays(selectedDate, n * 7)));
-  const openAdd = () => setSheet({ type: 'form', defaultDay: dow });
+  const openAdd = () => (data.isAdmin ? setSheet({ type: 'addChoice', defaultDay: dow }) : setSheet({ type: 'form', defaultDay: dow }));
   const openItem = (item, date = selected) => setSheet({ type: 'detail', item, date });
   const openAccount = () => setSheet({ type: 'account' });
   // Where the browser can show its own install dialog, install straight away. Otherwise open the steps.
@@ -229,7 +282,7 @@ export default function TimetableApp({ user }) {
     </button>
   );
 
-  const stats = computeStats(data.classes, data.attendance);
+  const stats = computeStats(allClasses, data.attendance);
 
   return (
     <div className="app">
@@ -337,7 +390,7 @@ export default function TimetableApp({ user }) {
 
               <aside className="side" aria-label="Attendance summary">
                 <h2>Attendance</h2>
-                <Attendance classes={data.classes} attendance={data.attendance} min={MIN_ATTENDANCE} compact />
+                <Attendance classes={allClasses} attendance={data.attendance} min={MIN_ATTENDANCE} compact />
                 <button className="link" onClick={() => setView('attendance')}>See details</button>
               </aside>
             </div>
@@ -361,7 +414,7 @@ export default function TimetableApp({ user }) {
               </div>
             </header>
             <WeekGrid
-              classes={data.classes}
+              occurrences={(key, d) => visibleOccurrences(data.isAdmin, key, d, data.classes, data.extras, data.exceptions)}
               routines={data.routines}
               weekStart={weekStart}
               todayKey={todayKey}
@@ -381,7 +434,7 @@ export default function TimetableApp({ user }) {
               </div>
               <div className="head-actions">{installBtn}{accountBtn}</div>
             </header>
-            <Attendance classes={data.classes} attendance={data.attendance} min={MIN_ATTENDANCE} />
+            <Attendance classes={allClasses} attendance={data.attendance} min={MIN_ATTENDANCE} />
           </>
         )}
       </main>
@@ -420,7 +473,9 @@ export default function TimetableApp({ user }) {
             item={sheet.item}
             dateStr={sheet.date}
             status={marks[`${sheet.item.id}|${sheet.date}`]}
-            canMark={sheet.date <= todayKey}
+            canMark={sheet.date <= todayKey && !sheet.item.cancelled}
+            admin={data.isAdmin && sheet.item.kind === 'class'}
+            onAdmin={(act) => onAdminAct(act, sheet.item, sheet.date)}
             isPast={sheet.date < todayKey}
             stat={sheet.item.kind === 'class' ? stats.find((s) => s.name.toLowerCase() === sheet.item.subject.toLowerCase()) : null}
             onMark={(st) => mark(sheet.item.id, sheet.date, st)}
@@ -435,6 +490,8 @@ export default function TimetableApp({ user }) {
           <Account
             user={user}
             elective={data.profile?.elective ? ELECTIVES[data.profile.elective] : null}
+            isAdmin={data.isAdmin}
+            onManage={() => setSheet({ type: 'manage' })}
             onChangeElective={() => setSheet({ type: 'elective' })}
             onSignOut={() => signOut({ callbackUrl: '/' })}
           />
@@ -444,6 +501,56 @@ export default function TimetableApp({ user }) {
       <Sheet open={sheet?.type === 'elective'} onClose={() => setSheet(null)} title="Choose elective">
         {sheet?.type === 'elective' && (
           <ElectiveChange current={data.profile?.elective} onSave={switchElective} onBack={() => setSheet({ type: 'account' })} />
+        )}
+      </Sheet>
+
+      <Sheet open={sheet?.type === 'addChoice'} onClose={() => setSheet(null)} title="Add">
+        {sheet?.type === 'addChoice' && (
+          <div className="add-choice">
+            <button className="add-opt" onClick={() => setSheet({ type: 'classForm', mode: 'extra-new', defaultDate: selected })}>
+              <strong>Extra class</strong>
+              <span>One time only, on a date. Shown to everyone.</span>
+            </button>
+            <button className="add-opt" onClick={() => setSheet({ type: 'classForm', mode: 'weekly-new', defaultDay: sheet.defaultDay })}>
+              <strong>Weekly class</strong>
+              <span>Repeats every week. Shown to everyone.</span>
+            </button>
+            <button className="add-opt" onClick={() => setSheet({ type: 'form', defaultDay: sheet.defaultDay })}>
+              <strong>My routine</strong>
+              <span>Gym, study time. Only you see it.</span>
+            </button>
+          </div>
+        )}
+      </Sheet>
+
+      <Sheet
+        open={sheet?.type === 'classForm'}
+        onClose={() => setSheet(null)}
+        title={{ 'extra-new': 'Extra class', extra: 'Edit extra class', 'weekly-new': 'New weekly class', 'weekly-edit': 'Edit every week', occurrence: 'Change this date' }[sheet?.mode] || 'Class'}
+      >
+        {sheet?.type === 'classForm' && (
+          <ClassForm
+            key={`${sheet.mode}-${sheet.item?.id || 'new'}`}
+            mode={sheet.mode}
+            item={sheet.item}
+            date={sheet.date}
+            defaultDay={sheet.defaultDay}
+            defaultDate={sheet.defaultDate}
+            onSave={classFormSave}
+            onCancel={() => setSheet(sheet.from === 'manage' ? { type: 'manage' } : null)}
+          />
+        )}
+      </Sheet>
+
+      <Sheet open={sheet?.type === 'manage'} onClose={() => setSheet(null)} title="Schedule changes">
+        {sheet?.type === 'manage' && data.admin && (
+          <ManagePanel
+            admin={data.admin}
+            onAction={(action, payload, msg) => runAdmin(action, payload, msg, true)}
+            onEditExtra={(x) => setSheet({ type: 'classForm', mode: 'extra', item: { ...x, extra: true }, from: 'manage' })}
+            onNewExtra={() => setSheet({ type: 'classForm', mode: 'extra-new', defaultDate: selected, from: 'manage' })}
+            onNewWeekly={() => setSheet({ type: 'classForm', mode: 'weekly-new', defaultDay: dow, from: 'manage' })}
+          />
         )}
       </Sheet>
 
