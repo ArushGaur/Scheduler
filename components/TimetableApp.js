@@ -5,7 +5,7 @@ import { api } from '@/lib/api';
 import { DAY_LONG, DAY_SHORT, MONTHS, addDays, dateKey, fmt, fmtRange, parseKey, toMin, weekStartOf } from '@/lib/time';
 import Timeline from '@/components/Timeline';
 import WeekGrid from '@/components/WeekGrid';
-import Attendance, { computeStats } from '@/components/Attendance';
+import Attendance, { computeStats, statKey } from '@/components/Attendance';
 import Sheet from '@/components/Sheet';
 import ItemForm from '@/components/ItemForm';
 import Detail from '@/components/Detail';
@@ -478,7 +478,7 @@ export default function TimetableApp({ user }) {
             admin={data.isAdmin && sheet.item.kind === 'class'}
             onAdmin={(act) => onAdminAct(act, sheet.item, sheet.date)}
             isPast={sheet.date < todayKey}
-            stat={sheet.item.kind === 'class' ? stats.find((s) => s.name.toLowerCase() === sheet.item.subject.toLowerCase()) : null}
+            stat={sheet.item.kind === 'class' ? stats.find((s) => s.key === statKey(sheet.item.subject, sheet.item.type)) : null}
             onMark={(st) => mark(sheet.item.id, sheet.date, st)}
             onEdit={() => setSheet({ type: 'form', item: sheet.item, defaultDay: sheet.item.day_of_week })}
             onDelete={() => remove(sheet.item)}

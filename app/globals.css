@@ -745,3 +745,6 @@ button { cursor: pointer; }
 .manage li span { font-size: 13px; color: var(--slate); }
 .manage-btns { display: flex; gap: 2px; flex-shrink: 0; }
 .manage-btns .btn { height: 38px; padding: 0 12px; }
+
+.att-group { margin: 26px 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--slate); }
+.att-overall + .att-overall { margin-top: -8px; }

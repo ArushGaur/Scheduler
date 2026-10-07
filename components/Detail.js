@@ -74,7 +74,7 @@ export default function Detail({ item, dateStr, status, canMark, isPast, stat, a
           )}
           {stat && stat.total > 0 && (
             <p className="detail-stat">
-              {stat.present} of {stat.total} classes attended so far, {Math.round((100 * stat.present) / stat.total)}%
+              {stat.present} of {stat.total} {String(item.type || '').toLowerCase() === 'lab' ? 'labs' : 'classes'} attended so far, {Math.round((100 * stat.present) / stat.total)}%
             </p>
           )}
         </div>

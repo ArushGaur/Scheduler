@@ -18,6 +18,8 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
               open();
             }
           };
+          // Longer sessions get a bigger card: about 72px for a 55 min class, 156px for 2 hours, 234px for 3.
+          const size = { minHeight: Math.max(64, Math.round((it.e - it.s) * 1.3)) };
           const short = false;
 
           if (it.kind === 'class') {
@@ -33,7 +35,7 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
                 data-short={short}
                                 data-live={isToday && it.s <= nowMin && nowMin < it.e}
                 data-past={isToday && it.e <= nowMin}
-                style={{ '--tint': c.bg, '--fg': c.fg, '--bar': c.bar }}
+                style={{ ...size, '--tint': c.bg, '--fg': c.fg, '--bar': c.bar }}
                 role="button"
                 tabIndex={0}
                 onClick={open}
@@ -92,6 +94,7 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
               key={`r${it.id}`}
               className="block routine"
               data-short={short}
+              style={size}
               role="button"
               tabIndex={0}
               onClick={open}
