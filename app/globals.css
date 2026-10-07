@@ -748,3 +748,14 @@ button { cursor: pointer; }
 
 .att-group { margin: 26px 0 12px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--slate); }
 .att-overall + .att-overall { margin-top: -8px; }
+
+.att-overall-combo { display: flex; flex-wrap: nowrap; gap: 0; }
+.att-overall-combo .att-stat { flex: 1 1 0; min-width: 0; }
+.att-overall-combo .att-stat + .att-stat { padding-left: 20px; margin-left: 20px; border-left: 1px solid rgba(255, 255, 255, 0.18); }
+.att-overall-combo .att-stat p { margin-top: 8px; color: #b4bdd2; }
+@media (max-width: 600px) {
+  .att-overall-combo { padding: 16px; }
+  .att-overall-combo .att-stat + .att-stat { padding-left: 14px; margin-left: 14px; }
+  .att-overall-combo .att-big { font-size: clamp(34px, 11vw, 48px); }
+  .att-overall-combo .att-stat p { font-size: 12px; line-height: 1.35; margin-top: 6px; }
+}

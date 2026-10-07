@@ -46,12 +46,13 @@ function advice(s, min) {
   return `Attend the next ${need} ${need === 1 ? 'class' : 'classes'} to reach ${min}%`;
 }
 
+const pctOf = (x) => (x.total ? Math.round((100 * x.present) / x.total) : null);
+
 export default function Attendance({ classes, attendance, min, compact }) {
   const stats = useMemo(() => computeStats(classes, attendance), [classes, attendance]);
-  const sum = (kind) => stats.filter((s) => s.kind === kind).reduce((t, s) => ({ p: t.p + s.present, n: t.n + s.total }), { p: 0, n: 0 });
+  const sum = (kind) => stats.filter((s) => s.kind === kind).reduce((t, s) => ({ present: t.present + s.present, total: t.total + s.total }), { present: 0, total: 0 });
   const classTotals = sum('class');
   const labTotals = sum('lab');
-  const pctOf = (t) => (t.n ? Math.round((100 * t.p) / t.n) : null);
   const hasLabs = stats.some((s) => s.kind === 'lab');
 
   if (stats.length === 0) {
@@ -62,7 +63,7 @@ export default function Attendance({ classes, attendance, min, compact }) {
     return (
       <ul className="att-compact">
         {stats.map((s) => {
-          const pct = s.total ? Math.round((100 * s.present) / s.total) : null;
+          const pct = pctOf(s);
           const c = colorFor(s.subject);
           return (
             <li key={s.key}>
@@ -82,7 +83,7 @@ export default function Attendance({ classes, attendance, min, compact }) {
   }
 
   const row = (s) => {
-    const pct = s.total ? Math.round((100 * s.present) / s.total) : null;
+    const pct = pctOf(s);
     const c = colorFor(s.subject);
     return (
       <li key={s.key} className="att-row" style={{ '--bar': c.bar, '--tint': c.bg, '--fg': c.fg }}>
@@ -114,28 +115,25 @@ export default function Attendance({ classes, attendance, min, compact }) {
     );
   };
 
-  const overallBlock = (title, t, note) =>
-    t.n ? (
-      <div className="att-overall">
-        <span className="att-big">{pctOf(t)}%</span>
-        <p>{title}: {t.p} of {t.n} {note} attended</p>
-      </div>
-    ) : null;
-
-  const nothing = !classTotals.n && !labTotals.n;
+  const stat = (title, t, noun) => (
+    <div className="att-stat">
+      <span className="att-big">{pctOf(t)}%</span>
+      <p>{title}: {t.present} of {t.total} {noun} attended</p>
+    </div>
+  );
 
   return (
     <div className="att">
-      {nothing ? (
+      {!classTotals.total && !labTotals.total ? (
         <div className="att-overall empty-state">
           <strong>Nothing tracked yet</strong>
           <p>Open the Day view on a class day and tap the tick or cross on the class. Attendance can be marked for today or any past class day.</p>
         </div>
       ) : (
-        <>
-          {overallBlock('Lectures and tutorials', classTotals, 'classes')}
-          {overallBlock('Labs', labTotals, 'labs')}
-        </>
+        <div className="att-overall att-overall-combo">
+          {classTotals.total > 0 && stat('Lectures and tutorials', classTotals, 'classes')}
+          {labTotals.total > 0 && stat('Labs', labTotals, 'labs')}
+        </div>
       )}
 
       <h2 className="att-group">Lectures and tutorials</h2>
