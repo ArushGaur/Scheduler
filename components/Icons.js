@@ -25,12 +25,22 @@ export const IconDay = make(
     <path d="M4 10h16M9 3v4M15 3v4" />
   </>
 );
-export const IconWeek = make(
+export const IconExam = make(
   <>
-    <rect x="4" y="4" width="7" height="7" rx="2" />
-    <rect x="13" y="4" width="7" height="7" rx="2" />
-    <rect x="4" y="13" width="7" height="7" rx="2" />
-    <rect x="13" y="13" width="7" height="7" rx="2" />
+    <path d="M7 3.5h8l3.5 3.5v13a1 1 0 01-1 1h-10.5a1 1 0 01-1-1v-15.5a1 1 0 011-1z" />
+    <path d="M14.5 3.5V7.5h4M9 12h6M9 15.5h6" />
+  </>
+);
+export const IconClock = make(
+  <>
+    <circle cx="12" cy="12" r="8.5" />
+    <path d="M12 7.5V12l3 2" />
+  </>
+);
+export const IconPin = make(
+  <>
+    <path d="M12 21s6.5-5.6 6.5-11a6.5 6.5 0 10-13 0c0 5.4 6.5 11 6.5 11z" />
+    <circle cx="12" cy="10" r="2.3" />
   </>
 );
 export const IconChart = make(<path d="M5 20v-9M12 20V5M19 20v-6" />);

@@ -4,7 +4,7 @@ import { signOut } from 'next-auth/react';
 import { api } from '@/lib/api';
 import { DAY_LONG, DAY_SHORT, MONTHS, addDays, dateKey, fmt, fmtRange, parseKey, toMin, weekStartOf } from '@/lib/time';
 import Timeline from '@/components/Timeline';
-import WeekGrid from '@/components/WeekGrid';
+import ExamList from '@/components/ExamList';
 import Attendance, { computeStats, statKey } from '@/components/Attendance';
 import Sheet from '@/components/Sheet';
 import ItemForm from '@/components/ItemForm';
@@ -17,15 +17,16 @@ import Onboarding from '@/components/Onboarding';
 import useInstall from '@/components/useInstall';
 import { colorFor } from '@/lib/colors';
 import { occurrencesOn } from '@/lib/resolve';
+import { examsFor } from '@/lib/exams';
 import { ELECTIVES } from '@/lib/curriculum';
-import { Brand, IconChart, IconDay, IconInstall, IconLeft, IconPlus, IconRight, IconWeek } from '@/components/Icons';
+import { Brand, IconChart, IconDay, IconExam, IconInstall, IconLeft, IconPlus, IconRight } from '@/components/Icons';
 
 // Most colleges require 75%. Change it here if yours is different.
 const MIN_ATTENDANCE = 75;
 
 const NAV = [
   { id: 'day', label: 'Day', Icon: IconDay },
-  { id: 'week', label: 'Week', Icon: IconWeek },
+  { id: 'exam', label: 'Exams', Icon: IconExam },
   { id: 'attendance', label: 'Attendance', Icon: IconChart },
 ];
 
@@ -88,6 +89,13 @@ export default function TimetableApp({ user }) {
     () => [...data.classes, ...data.extras.filter((x) => todayKey && x.date <= todayKey)],
     [data.classes, data.extras, todayKey]
   );
+
+  // Exams for the courses on this student's timetable (their elective included).
+  const exams = useMemo(() => {
+    const seen = new Map();
+    data.classes.forEach((c) => c.code && !seen.has(c.code) && seen.set(c.code, { code: c.code, subject: c.subject }));
+    return examsFor([...seen.values()]);
+  }, [data.classes]);
 
   const marks = useMemo(() => {
     const m = {};
@@ -259,8 +267,6 @@ export default function TimetableApp({ user }) {
   }
 
   const weekStart = weekStartOf(selectedDate);
-  const weekEnd = addDays(weekStart, 6);
-  const rangeLabel = `${weekStart.getDate()} ${MONTHS[weekStart.getMonth()].slice(0, 3)} to ${weekEnd.getDate()} ${MONTHS[weekEnd.getMonth()].slice(0, 3)}`;
   const shiftWeek = (n) => setSelected(dateKey(addDays(selectedDate, n * 7)));
   const openAdd = () => (data.isAdmin ? setSheet({ type: 'addChoice', defaultDay: dow }) : setSheet({ type: 'form', defaultDay: dow }));
   const openItem = (item, date = selected) => setSheet({ type: 'detail', item, date });
@@ -398,31 +404,16 @@ export default function TimetableApp({ user }) {
           </>
         )}
 
-        {view === 'week' && (
+        {view === 'exam' && (
           <>
             <header className="head">
               <div>
-                <h1>Week</h1>
-                <p className="date">{rangeLabel}</p>
+                <h1>Exams</h1>
+                <p className="date">{exams.length} {exams.length === 1 ? 'exam' : 'exams'}</p>
               </div>
-              <div className="head-lead">
-                <button className="icon-btn boxed" onClick={() => shiftWeek(-1)} aria-label="Previous week"><IconLeft size={20} /></button>
-                <button className="icon-btn boxed" onClick={() => shiftWeek(1)} aria-label="Next week"><IconRight size={20} /></button>
-              </div>
-              <div className="head-actions">
-                {installBtn}{accountBtn}
-                <button className="btn primary add-desktop" onClick={openAdd}><IconPlus size={18} /> Add</button>
-              </div>
+              <div className="head-actions">{installBtn}{accountBtn}</div>
             </header>
-            <WeekGrid
-              occurrences={(key, d) => visibleOccurrences(data.isAdmin, key, d, data.classes, data.extras, data.exceptions)}
-              routines={data.routines}
-              weekStart={weekStart}
-              todayKey={todayKey}
-              marks={marks}
-              onPickDay={(k) => { setSelected(k); setView('day'); }}
-              onOpen={(it, k) => { setSelected(k); openItem(it, k); }}
-            />
+            <ExamList exams={exams} todayKey={todayKey} />
           </>
         )}
 

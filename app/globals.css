@@ -759,3 +759,56 @@ button { cursor: pointer; }
   .att-overall-combo .att-big { font-size: clamp(34px, 11vw, 48px); }
   .att-overall-combo .att-stat p { font-size: 12px; line-height: 1.35; margin-top: 6px; }
 }
+
+
+/* ---------- exams ---------- */
+.exams { display: grid; gap: 14px; }
+.exam-section { font-size: 13px; font-weight: 650; letter-spacing: 0.08em; text-transform: uppercase; color: var(--slate); margin: 6px 4px -4px; }
+.exam-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.exam { display: flex; gap: 14px; align-items: stretch; background: var(--paper); border: 1px solid var(--line-soft); border-radius: 18px; padding: 10px; }
+.exam.past { opacity: 0.55; }
+.exam-date { flex: 0 0 68px; display: grid; place-content: center; justify-items: center; padding: 12px 4px; border-radius: 16px; color: var(--fg);
+  background: linear-gradient(160deg, color-mix(in srgb, var(--tint) 55%, #fff), var(--tint)); }
+.exam-date span { font-size: 11px; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; opacity: 0.8; }
+.exam-date b { font-family: var(--display); font-size: 32px; line-height: 1.05; font-weight: 700; letter-spacing: -0.03em; }
+.exam-body { min-width: 0; flex: 1; display: grid; gap: 6px; align-content: center; padding: 2px 4px 2px 0; }
+.exam-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.exam-chip { font-size: 12px; font-weight: 700; letter-spacing: 0.04em; padding: 3px 9px; border-radius: 99px; background: var(--tint); color: var(--fg); }
+.exam-body h3 { font-family: var(--display); font-size: 19px; line-height: 1.2; font-weight: 650; letter-spacing: -0.015em; overflow-wrap: anywhere; }
+.exam-when { flex-shrink: 0; font-size: 12px; font-weight: 650; padding: 4px 10px; border-radius: 99px; background: var(--mist); color: var(--slate); white-space: nowrap; }
+.exam-date.tba b { font-size: 22px; letter-spacing: -0.01em; }
+.exam-when[data-state='tba'] { background: transparent; border: 1px dashed var(--line); }
+.exam-when[data-state='today'] { background: var(--neg-bg); color: var(--neg); }
+.exam-when[data-state='soon'] { background: #fbecc4; color: #6b4a00; }
+.exam-info { display: grid; gap: 5px; margin-top: 2px; }
+.exam-row { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--ink-2); }
+.exam-row svg { flex-shrink: 0; color: var(--slate); }
+.exam-loc.tba { color: var(--slate); font-style: italic; }
+
+.exam-hero { position: relative; overflow: hidden; padding: 14px 16px; border-radius: 20px; color: #fff;
+  background: radial-gradient(90% 120% at 100% 0%, rgba(255, 194, 46, 0.28), transparent 60%), linear-gradient(160deg, var(--ink-lift), var(--ink-deep));
+  box-shadow: var(--shadow-s), inset 0 1px 0 rgba(255, 255, 255, 0.14); }
+.exam-hero-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+.exam-hero-tag { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 9px; border-radius: 99px; background: linear-gradient(160deg, var(--gold-1), var(--gold-2)); color: var(--ink-deep); }
+.exam-hero-date { font-size: 13px; color: #c3cbe0; font-weight: 550; }
+.exam-hero-count { display: flex; align-items: baseline; gap: 8px; margin: 8px 0 2px; }
+.exam-hero-count b { font-family: var(--display); font-size: 34px; line-height: 1; letter-spacing: -0.03em; font-weight: 700; }
+.exam-hero-count span { font-size: 14px; color: #c3cbe0; font-weight: 550; }
+.exam-hero h2 { font-family: var(--display); font-size: 18px; line-height: 1.2; font-weight: 650; letter-spacing: -0.015em; }
+.exam-hero-code { margin-top: 1px; font-size: 12px; font-weight: 650; letter-spacing: 0.05em; color: #9fa9c4; }
+.exam-hero .exam-info { margin-top: 8px; padding-top: 8px; gap: 3px; border-top: 1px solid rgba(255, 255, 255, 0.14); }
+.exam-hero .exam-row { font-size: 13px; color: #e8ecf6; }
+.exam-hero .exam-row svg { color: #ffc22e; width: 15px; height: 15px; }
+.exam-hero .exam-loc.tba { color: #aab4cf; }
+
+@media (min-width: 768px) {
+  .exam-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .exam-hero { padding: 18px 20px; }
+}
+@media (min-width: 1360px) { .exam-list { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 1023.98px) {
+  .exam { border-radius: 26px; padding: 12px; background: var(--glass); border: 1px solid var(--glass-edge); box-shadow: var(--shadow-s); }
+  .exam-date { border-radius: 18px; }
+  .exam-hero { border-radius: 24px; }
+  .main > .head + .exams, .main > .head + .empty { margin-top: 18px; }
+}

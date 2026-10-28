@@ -106,8 +106,8 @@ export default function Attendance({ classes, attendance, min, compact }) {
         )}
         {s.history.length > 0 && (
           <div className="dots" aria-label="Recent classes">
-            {s.history.map((h) => (
-              <i key={h.date} className={h.status} title={`${h.date}: ${h.status}`} />
+            {s.history.map((h, n) => (
+              <i key={`${h.date}-${n}`} className={h.status} title={`${h.date}: ${h.status}`} />
             ))}
           </div>
         )}
