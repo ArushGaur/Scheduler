@@ -52,11 +52,7 @@ export default function ExamList({ exams, todayKey }) {
     ...rest.filter((x) => x.diff === null),
     ...rest.filter((x) => x.diff !== null && x.diff < 0),
   ];
-<<<<<<< HEAD
   const nameOf = (x) => (x.type === 'Lab' || x.type === 'Quiz' ? `${x.subject} ${x.type}` : x.subject);
-=======
-  const nameOf = (x) => (x.type === 'Lab' ? `${x.subject} Lab` : x.subject);
->>>>>>> f96598b7eb3a853bacd31acfda8a6ba7d07034f5
   const nd = next ? parseKey(next.date) : null;
 
   return (
@@ -72,11 +68,7 @@ export default function ExamList({ exams, todayKey }) {
             {next.diff > 0 && <span>{next.diff === 1 ? 'day to go' : 'days to go'}</span>}
           </div>
           <h2>{nameOf(next)}</h2>
-<<<<<<< HEAD
           <p className="exam-hero-code">{next.code}{next.type === 'Lab' ? ' · LAB EXAM' : next.type === 'Quiz' ? ' · QUIZ' : ''}</p>
-=======
-          <p className="exam-hero-code">{next.code}{next.type === 'Lab' ? ' · LAB EXAM' : ''}</p>
->>>>>>> f96598b7eb3a853bacd31acfda8a6ba7d07034f5
           <Details x={next} />
         </section>
       )}
@@ -107,11 +99,7 @@ export default function ExamList({ exams, todayKey }) {
                   </div>
                   <div className="exam-body">
                     <div className="exam-top">
-<<<<<<< HEAD
                       <span className="exam-chip">{x.code}{x.type === 'Lab' || x.type === 'Quiz' ? ` · ${x.type}` : ''}</span>
-=======
-                      <span className="exam-chip">{x.code}{x.type === 'Lab' ? ' · Lab' : ''}</span>
->>>>>>> f96598b7eb3a853bacd31acfda8a6ba7d07034f5
                       <span className="exam-when" data-state={left.state}>{left.text}</span>
                     </div>
                     <h3>{nameOf(x)}</h3>
