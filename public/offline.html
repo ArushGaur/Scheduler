@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f3f6fb">
+<title>Timetable is offline</title>
+<style>
+  :root { color-scheme: light; }
+  body { margin: 0; min-height: 100dvh; display: grid; place-items: center; padding: 24px; text-align: center;
+    font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; color: #0d1630;
+    background: radial-gradient(110% 40% at 100% 0%, rgba(255,194,46,.2), transparent 60%), #e9edf4; }
+  img { width: 88px; height: 88px; border-radius: 22px; box-shadow: 0 18px 30px -16px rgba(13,22,48,.5); }
+  h1 { margin: 22px 0 8px; font-size: 26px; letter-spacing: -0.03em; }
+  p { margin: 0 auto 24px; max-width: 300px; color: #5d697f; line-height: 1.45; }
+  button { height: 48px; padding: 0 26px; border: 0; border-radius: 999px; font: 600 15px inherit; color: #fff;
+    background: linear-gradient(165deg, #22325e, #0d1630); box-shadow: 0 12px 22px -12px rgba(13,22,48,.7); }
+</style>
+</head>
+<body>
+  <main>
+    <img src="/icons/icon-192.png" alt="">
+    <h1>You're offline</h1>
+    <p>Timetable needs a connection to load your classes. Check your internet and try again.</p>
+    <button onclick="location.reload()">Try again</button>
+  </main>
+</body>
+</html>
