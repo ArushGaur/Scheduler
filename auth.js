@@ -7,7 +7,8 @@ import Google from 'next-auth/providers/google';
 // signs the login cookie, so if it is not set the Google client secret is used for that.
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [Google],
-  secret: process.env.AUTH_SECRET || process.env.AUTH_GOOGLE_SECRET,
+  // In development a throwaway secret is used if none is set, so the app can start. In production a real one is required.
+  secret: process.env.AUTH_SECRET || process.env.AUTH_GOOGLE_SECRET || (process.env.NODE_ENV !== 'production' ? 'dev-only-secret-change-me' : undefined),
   session: { strategy: 'jwt' },
   trustHost: true,
   callbacks: {
