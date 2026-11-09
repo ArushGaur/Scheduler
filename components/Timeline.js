@@ -26,12 +26,12 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
             const c = colorFor(it.subject);
             const status = marks[`${it.id}|${dateStr}`];
             const place = [it.code, it.teacher].filter(Boolean).join(', ');
-            const tag = it.cancelled ? 'Cancelled' : it.extra ? 'Extra' : it.changed ? 'Changed' : null;
-            const tagKind = it.cancelled ? 'cancelled' : it.extra ? 'extra' : 'changed';
+            const tag = it.completed ? 'Completed' : it.cancelled ? 'Cancelled' : it.extra ? 'Extra' : it.changed ? 'Changed' : null;
+            const tagKind = it.completed ? 'completed' : it.cancelled ? 'cancelled' : it.extra ? 'extra' : 'changed';
             return (
               <div
                 key={`c${it.id}`}
-                className={`block class ${status || ''} ${it.cancelled ? 'cancelled' : ''}`}
+                className={`block class ${status || ''} ${it.cancelled ? 'cancelled' : ''} ${it.completed ? 'completed' : ''}`}
                 data-short={short}
                                 data-live={isToday && it.s <= nowMin && nowMin < it.e}
                 data-past={isToday && it.e <= nowMin}
@@ -57,7 +57,7 @@ export default function Timeline({ items, dateStr, isToday, nowMin, marks, canMa
                 {!canMark && status && !it.cancelled && (
                   <span className={`b-status ${status}`}>{status === 'present' ? 'Present' : 'Absent'}</span>
                 )}
-                {canMark && !it.cancelled && (
+                {canMark && !it.cancelled && !it.completed && (
                   <div className="b-marks" onClick={(e) => e.stopPropagation()}>
                     <button
                       className={`mark present ${status === 'present' ? 'on' : ''}`}

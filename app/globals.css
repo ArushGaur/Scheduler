@@ -714,12 +714,15 @@ button { cursor: pointer; }
 .b-tag[data-kind='extra'] { background: var(--ink); color: #fff; }
 .b-tag[data-kind='changed'] { background: #fde7b0; color: #6b4a00; }
 .b-tag[data-kind='cancelled'] { background: var(--neg-bg); color: var(--neg); }
+.b-tag[data-kind='completed'] { background: #dcf1e3; color: #1d5b32; }
 .week-item .b-tag { margin-left: 0; }
 .block.class.cancelled, .week-item.cancelled { opacity: 0.62; }
+.block.class.completed, .week-item.completed { opacity: 0.72; }
 .block.class.cancelled .b-text strong, .week-item.cancelled .wi-name { text-decoration: line-through; text-decoration-thickness: 1.5px; }
 .status-tag { display: inline-block; margin-top: 6px; padding: 3px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; }
 .status-tag[data-kind='extra'] { background: var(--ink); color: #fff; }
 .status-tag[data-kind='changed'] { background: #fde7b0; color: #6b4a00; }
+.status-tag[data-kind='completed'] { background: #dcf1e3; color: #1d5b32; }
 .status-tag[data-kind='cancelled'] { background: var(--neg-bg); color: var(--neg); }
 .detail-top .detail-was { font-size: 13px; }
 .admin-box { margin-top: 22px; padding-top: 18px; border-top: 1px solid var(--line-soft); }

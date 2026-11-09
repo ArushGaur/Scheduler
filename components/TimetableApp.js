@@ -208,8 +208,9 @@ export default function TimetableApp({ user }) {
   }, [data, dow, selected]);
 
   const subline = useMemo(() => {
-    const cls = items.filter((i) => i.kind === 'class' && !i.cancelled);
+    const cls = items.filter((i) => i.kind === 'class' && !i.cancelled && !i.completed);
     const cancelled = items.filter((i) => i.cancelled).length;
+    const completed = items.filter((i) => i.completed).length;
     if (isToday) {
       const current = cls.find((i) => i.s <= nowMin && nowMin < i.e);
       const next = cls.find((i) => i.s > nowMin);
@@ -218,7 +219,7 @@ export default function TimetableApp({ user }) {
       return cls.length ? 'Classes are done for today' : cancelled ? 'Today’s classes are cancelled' : 'No classes today';
     }
     const r = items.filter((i) => i.kind === 'routine').length;
-    return `${cls.length} ${cls.length === 1 ? 'class' : 'classes'}${cancelled ? `, ${cancelled} cancelled` : ''} and ${r} ${r === 1 ? 'routine' : 'routines'}`;
+    return `${cls.length} ${cls.length === 1 ? 'class' : 'classes'}${cancelled ? `, ${cancelled} cancelled` : ''}${completed ? `, ${completed} completed` : ''} and ${r} ${r === 1 ? 'routine' : 'routines'}`;
   }, [items, isToday, nowMin]);
 
   const swipe = useRef({ x: 0, y: 0 });
@@ -228,10 +229,10 @@ export default function TimetableApp({ user }) {
     const dy = e.changedTouches[0].clientY - swipe.current.y;
     if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.6 && selectedDate) setSelected(dateKey(addDays(selectedDate, dx < 0 ? 1 : -1)));
   };
-  const live = isToday && items.some((i) => i.kind === 'class' && !i.cancelled && i.s <= nowMin && nowMin < i.e);
+  const live = isToday && items.some((i) => i.kind === 'class' && !i.cancelled && !i.completed && i.s <= nowMin && nowMin < i.e);
   const focus = useMemo(() => {
     if (!isToday) return null;
-    const cls = items.filter((i) => i.kind === 'class' && !i.cancelled);
+    const cls = items.filter((i) => i.kind === 'class' && !i.cancelled && !i.completed);
     const current = cls.find((i) => i.s <= nowMin && nowMin < i.e);
     if (current) return { kind: 'now', item: current, left: current.e - nowMin, pct: Math.round(((nowMin - current.s) / (current.e - current.s)) * 100) };
     const next = cls.find((i) => i.s > nowMin);
@@ -465,7 +466,7 @@ export default function TimetableApp({ user }) {
             item={sheet.item}
             dateStr={sheet.date}
             status={marks[`${sheet.item.id}|${sheet.date}`]}
-            canMark={sheet.date <= todayKey && !sheet.item.cancelled}
+            canMark={sheet.date <= todayKey && !sheet.item.cancelled && !sheet.item.completed}
             admin={data.isAdmin && sheet.item.kind === 'class'}
             onAdmin={(act) => onAdminAct(act, sheet.item, sheet.date)}
             isPast={sheet.date < todayKey}

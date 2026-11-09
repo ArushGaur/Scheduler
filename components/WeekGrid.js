@@ -34,15 +34,15 @@ export default function WeekGrid({ occurrences, routines, weekStart, todayKey, m
                 return (
                   <li key={`${it.kind}${it.id}`}>
                     <button
-                      className={`week-item ${isClass ? 'class' : 'routine'} ${it.cancelled ? 'cancelled' : ''}`}
+                      className={`week-item ${isClass ? 'class' : 'routine'} ${it.cancelled ? 'cancelled' : ''} ${it.completed ? 'completed' : ''}`}
                       style={c ? { '--tint': c.bg, '--fg': c.fg, '--bar': c.bar } : undefined}
                       onClick={() => onOpen(it, key)}
                     >
                       <span className="wi-time">{fmt(it.start_time)}</span>
                       <span className="wi-name">{isClass ? it.subject : it.title}</span>
-                      {isClass && (it.cancelled || it.extra || it.changed) && (
-                        <span className="b-tag" data-kind={it.cancelled ? 'cancelled' : it.extra ? 'extra' : 'changed'}>
-                          {it.cancelled ? 'Cancelled' : it.extra ? 'Extra' : 'Changed'}
+                      {isClass && (it.completed || it.cancelled || it.extra || it.changed) && (
+                        <span className="b-tag" data-kind={it.completed ? 'completed' : it.cancelled ? 'cancelled' : it.extra ? 'extra' : 'changed'}>
+                          {it.completed ? 'Completed' : it.cancelled ? 'Cancelled' : it.extra ? 'Extra' : 'Changed'}
                         </span>
                       )}
                       {isClass && it.type && <span className="wi-type">{it.type}</span>}

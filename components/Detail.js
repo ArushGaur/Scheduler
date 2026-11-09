@@ -12,7 +12,7 @@ export default function Detail({ item, dateStr, status, canMark, isPast, stat, a
   const c = isClass ? colorFor(item.subject) : null;
   const name = isClass ? item.subject : item.title;
 
-  const tag = item.cancelled ? 'Cancelled' : item.extra ? 'Extra class' : item.changed ? 'Changed for today' : null;
+  const tag = item.completed ? 'Completed' : item.cancelled ? 'Cancelled' : item.extra ? 'Extra class' : item.changed ? 'Changed for today' : null;
   const was = item.changed && item.was;
   const adminDo = async (act) => {
     setBusy(true);
@@ -35,7 +35,7 @@ export default function Detail({ item, dateStr, status, canMark, isPast, stat, a
         <span className={`swatch ${isClass ? '' : 'dashed'}`} />
         <div>
           <h3>{name}</h3>
-          {tag && <span className="status-tag" data-kind={item.cancelled ? 'cancelled' : item.extra ? 'extra' : 'changed'}>{tag}</span>}
+          {tag && <span className="status-tag" data-kind={item.completed ? 'completed' : item.cancelled ? 'cancelled' : item.extra ? 'extra' : 'changed'}>{tag}</span>}
           <p>
             {item.extra && dateStr ? parseKey(dateStr).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' }) : DAY_LONG[item.day_of_week]}, {fmt(item.start_time)}
             {item.end_time ? ` to ${fmt(item.end_time)}` : ''}
@@ -53,7 +53,18 @@ export default function Detail({ item, dateStr, status, canMark, isPast, stat, a
 
       {isClass && item.cancelled && <p className="detail-locked">This class is cancelled on this date, so it does not count towards attendance.</p>}
 
-      {isClass && !item.cancelled && (
+      {isClass && item.completed && (
+        <>
+          <p className="detail-locked">This {String(item.type || '').toLowerCase() === 'lab' ? 'lab' : 'course'} is completed, so there are no more classes to mark.</p>
+          {stat && stat.total > 0 && (
+            <p className="detail-stat">
+              Final attendance: {stat.present} of {stat.total} {String(item.type || '').toLowerCase() === 'lab' ? 'labs' : 'classes'}, {Math.round((100 * stat.present) / stat.total)}%
+            </p>
+          )}
+        </>
+      )}
+
+      {isClass && !item.cancelled && !item.completed && (
         <div className="detail-attendance">
           <p className="detail-label">
             {canMark
